@@ -1,2 +1,2 @@
 # Balls
-Just bouncing balls
+Just bouncing balls with little functionality
