@@ -4,6 +4,7 @@ resizeCanvas();
 // Telling that it's 2d drawing
 var ctx = c.getContext("2d");
 
+// Global variables
 let lastCharacters = "";
 let debug = false;
 
@@ -12,8 +13,6 @@ let trace = null;
 
 let TimeStep = 1;
 let prevTimeStep = TimeStep;
-
-
 
 // Ball object
 class Ball {
@@ -31,6 +30,7 @@ class Ball {
 	}
 	
 	ChangeVelocity(velocity){
+		// Need to calculate current vector before updating
 		this.direction = Math.atan(this.velocityY/this.velocityX);
 		
 		this.velocityX = velocity * Math.cos(this.direction);
@@ -53,7 +53,7 @@ class Ball {
 			this.y = c.height - bs;
 		}
 		
-		// Direction change
+		// Direction change (Can be done in previous if statements)
 		if(this.x <= 0 + bs || this.x >= c.width - bs){
 			this.velocityX = -this.velocityX;
 		}
@@ -68,6 +68,7 @@ class Ball {
 	}
 }
 
+// Make 250 balls
 var balls = Array.from(Array(250)).map((_element, _id)=>{
 	var id = _id;
 	var b = (Math.random() * 6) + 2;
@@ -113,7 +114,7 @@ function Draw(){
 	// Draw lines between balls
 	for(var i = 0; i < balls.length; i++){
 		for(var j = 0; j < balls.length; j++){
-			// find if these two have a connection already
+			// Find if these two have a connection already
 			let con = balls[i].connections.includes(balls[j].id);
 			let dis = Distance(balls[i], balls[j], 150);
 			if(i != j && dis && !con){
@@ -140,8 +141,9 @@ function Draw(){
 	//Fast Debug
 	if(debug){
 		ctx.font = "15px Arial"
-		// Texts
-		let dText = ["TimeStep: " + TimeStep];
+		
+		let dText = [];
+		dText.push("TimeStep: " + TimeStep);
 		dText.push((trace != null ? "Selected ball id: " + trace.id : ""));
 		dText.push("Last typed characters: " + lastCharacters);
 		
@@ -166,10 +168,12 @@ function Draw(){
 	window.requestAnimationFrame(Draw);
 }
 
+// Just a helper function that is used in one place for now
 function Clamp(a,b,x){
 	return x > a ? (x < b ? x : b) : a;
 }
 
+// Function that puts every ball in the center
 function Explode(){
 	for(i = 0; i < balls.length; i++){
 		balls[i].x = c.width/2;
@@ -177,19 +181,20 @@ function Explode(){
 	}
 }
 
+// Calculates the distance to other balls
 function Distance(a, b, distance) {
 	const dx = a.x - b.x;
 	const dy = a.y - b.y;
-
+	// First check the distance roughly to little optimise calculations
 	if(dx < distance && dx > -distance && dy < distance && dy > -distance){
+		// After calculating that it could be close enough then do the more presice calculation
 		const dis = Math.hypot(dx, dy);
-		if(dis < distance){
-			return true;
-		}
+		if(dis < distance){ return true; }
 	}
 	return false;
 }
 
+// Just to run and stop the updating (Basically obselete, because TimeStep)
 function Run(tf){
 	if(tf == null){
 		if(run){ run = false; } else { run = true; }
@@ -198,6 +203,7 @@ function Run(tf){
 	}
 }
 
+// Pretty self explanatory
 function TraceConnections(_id){
 	if(_id instanceof Ball){
 		trace = _id;
@@ -220,6 +226,7 @@ function TraceConnections(_id){
 	}
 }
 
+// This is the function to find the ball and colors the connections
 function FindBall(_id){
 	ClearFind();
 	if(_id instanceof Ball){				
@@ -240,12 +247,14 @@ function FindBall(_id){
 		
 }
 
+// Self explanatory
 function ClearFind(){
 	for(var i = 0; i < balls.length; i++){
 		balls[i].color = "#000";
 	}
 }
 
+// Enables user the ability to click ball and show the connections
 function selectBall(event){
 	for(var i = 0; i < balls.length; i++){
 		if(	(event.clientX < balls[i].x + balls[i].ballSize) &&
@@ -253,18 +262,19 @@ function selectBall(event){
 			(event.clientY < balls[i].y + balls[i].ballSize) &&
 			(event.clientY > balls[i].y - balls[i].ballSize)){
 				TraceConnections(balls[i]);
-				//console.log("Found ball: " + i);
 				return;
 			}
 	}
 	TraceConnections();
 }
 
+// Self explanatory
 function resizeCanvas(){
 	c.width = window.innerWidth;
 	c.height = window.innerHeight;
 }
 
+// Event listeners for buttons that can be held down
 document.addEventListener('keydown', function(event) {
 	if(event.code == 'NumpadAdd'){
 		TimeStep += 1;
@@ -274,8 +284,9 @@ document.addEventListener('keydown', function(event) {
 		TimeStep -= 1;
 		console.log("Time step decreased to " + TimeStep);
 	}
-	else if(event.code == 'ArrowUp' && TimeStep < 1){
-		
+	// This need to be in held section because it can't be detected in press listener
+	// "Steps" by 1 frame/update
+	else if(event.code == 'ArrowUp' && TimeStep < 1){ 
 		TimeStep = 1;
 		Update();
 		TimeStep = 0;
@@ -293,15 +304,15 @@ document.addEventListener('keydown', function(event) {
 	
 });
 
+// Event listener that logs last 10 buttons pressed
 document.addEventListener('keypress', function(event) {
 	lastCharacters += event.key;
-	let sLength = lastCharacters.length;
-	if(sLength >= 10){
+	if(lastCharacters.length >= 10){
 		lastCharacters = lastCharacters.substring(1, sLength);
 	}
 	
-	sLength = lastCharacters.length;
-	
+	let sLength = lastCharacters.length;
+	// if the last 3 chars type dev then open debug
 	if(lastCharacters.substring(sLength-3, sLength) === "dev"){
 		debug = !debug;
 		lastCharacters = "";
@@ -309,11 +320,11 @@ document.addEventListener('keypress', function(event) {
 	}
 });
 
+// If clicked somewhere then do this
 document.addEventListener("click", selectBall);
-
+// Resize listener
 window.addEventListener("resize", resizeCanvas);
 
+// Run the Loop function 60 per second and draw it
 setInterval(Loop, 1000/60);
 window.requestAnimationFrame(Draw);
-
-console.log("Ma toimin!");
