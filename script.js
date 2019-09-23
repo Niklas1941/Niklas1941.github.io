@@ -308,7 +308,7 @@ document.addEventListener('keydown', function(event) {
 document.addEventListener('keypress', function(event) {
 	lastCharacters += event.key;
 	if(lastCharacters.length >= 10){
-		lastCharacters = lastCharacters.substring(1, sLength);
+		lastCharacters = lastCharacters.substring(1, lastCharacters.length);
 	}
 	
 	let sLength = lastCharacters.length;
