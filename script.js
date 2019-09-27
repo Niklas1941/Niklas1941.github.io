@@ -30,11 +30,9 @@ class Ball {
 	}
 	
 	ChangeVelocity(velocity){
-		// Need to calculate current vector before updating
-		this.direction = Math.atan(this.velocityY/this.velocityX);
-		
-		this.velocityX = velocity * Math.cos(this.direction);
-		this.velocityY = velocity * Math.sin(this.direction);
+		this.velocityX = (this.velocityX/this.v) * velocity;
+		this.velocityY = (this.velocityY/this.v) * velocity;
+		this.v = velocity;
 	}
 
 	Update(){
@@ -162,7 +160,7 @@ function Draw(){
 	
 	// Made by
 	ctx.font = "15px Arial";
-	let txt = "© Niko Heikkinen 2018";
+	let txt = "© Niko Heikkinen 2019";
 	ctx.fillStyle = "#000";
 	ctx.fillText(txt,c.width-ctx.measureText(txt).width-5,c.height-5);
 	window.requestAnimationFrame(Draw);
@@ -308,14 +306,13 @@ document.addEventListener('keydown', function(event) {
 document.addEventListener('keypress', function(event) {
 	lastCharacters += event.key;
 	if(lastCharacters.length >= 10){
-		lastCharacters = lastCharacters.substring(1, lastCharacters.length);
+		lastCharacters = lastCharacters.substring(lastCharacters.length-10, lastCharacters.length);
 	}
 	
 	let sLength = lastCharacters.length;
 	// if the last 3 chars type dev then open debug
 	if(lastCharacters.substring(sLength-3, sLength) === "dev"){
 		debug = !debug;
-		lastCharacters = "";
 		ClearFind();
 	}
 });
