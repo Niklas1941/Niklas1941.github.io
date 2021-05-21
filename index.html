@@ -1,28 +1,27 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Hieno Sivu</title>
+	<title>Main page</title>
 
 	<meta charset="utf-8">
 
-	<style type="text/css">
-	body{
-		margin: 0;
-		padding: 0;
-		overflow: hidden;
-		text-align: center;
-	}
+	<link rel="preconnect" href="https://fonts.gstatic.com">
+	<link href="https://fonts.googleapis.com/css2?family=Farro:wght@500&display=swap" rel="stylesheet">
 
-	div{
-		margin: 0;
-		padding: 0;
-		overflow: hidden;
-	}
-	</style>
+	<link rel="stylesheet" href="MainPage.css">
 </head>
 <body>
-	<h1>This is just a test now</h1>
-	<p><a href="./Bouncy balls/index.html">This is link to bouncy balls</a></p>
+	<div id="Main">
+		<h1 id="Title">Links to little things i've made</h1>
+
+		<div class="LinkContainer">
+			<a class="ItemLink" href="./Bouncy balls/index.html">
+				<img class="LinkImage" src="./Link images/BouncyBalls.PNG" alt="Bouncy balls">
+				This is link to bouncy balls
+			</a>
+		</div>
+	</div>
+
 	<!-- Script starts here -->
 	<script src="script.js"></script>
 </body>

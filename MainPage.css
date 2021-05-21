@@ -1,0 +1,65 @@
+/* COLOR Palette */
+/*
+    Almost black:   #0B0C10
+    Grey:           #1F2833
+    Light grey:     #C5C6C7
+    Light blue:     #66FCF1
+    Dark blue:      #45A29E
+*/
+
+body{
+    margin-top: 40vh;
+    background-color: #1F2833;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0;
+}
+
+#Title{
+    font-family: 'Farro', sans-serif;
+    color: #66FCF1;
+    font-size: 4rem;
+}
+
+#Main{
+    margin-top: 50vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+.LinkImage{
+    object-fit: cover;
+    width: 100%;
+    height: 75%;
+}
+
+.LinkContainer{
+    height: 15%;
+    width: 15%;
+    background-color: #0B0C10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+    border-radius: 10px;
+}
+
+.ItemLink{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 1rem;
+}
+
+.ItemLink:link, .ItemLink:visited{
+    color: #C5C6C7;
+}
+
+.ItemLink:hover, .ItemLink:active{
+    color: #bbbbbb;
+}
