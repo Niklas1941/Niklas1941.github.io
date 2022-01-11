@@ -18,6 +18,8 @@ let prevTimeStep = TimeStep;
 let mouseX = c.width / 2;
 let mouseY = c.height / 2;
 
+const gravitationalConstant = 6.67 * Math.pow(10, -8);
+
 // Ball object
 class Ball {
   constructor(x, y, v, d, b, _id) {
@@ -41,6 +43,7 @@ class Ball {
 
   Update() {
     let bs = this.ballSize;
+    let velocityApplied = false;
 
     // Out of bounds
     if (this.x < 0 + bs) {
@@ -68,26 +71,28 @@ class Ball {
 
     // Gravity
     this.connections.forEach(ball => {
-      this.velocityX +=
-        Math.cos(Math.atan2(ball.y - this.y, ball.x - this.x)) *
-        (0.1 -
-          convertRange(
-            Math.sqrt(
-              Math.pow(ball.x - this.x, 2) + Math.pow(ball.y - this.y, 2)
-            ),
-            [150, 0],
-            [0, 0.1]
-          ));
-      this.velocityY +=
-        Math.sin(Math.atan2(ball.y - this.y, ball.x - this.x)) *
-        (0.1 -
-          convertRange(
-            Math.sqrt(
-              Math.pow(ball.x - this.x, 2) + Math.pow(ball.y - this.y, 2)
-            ),
-            [150, 0],
-            [0, 0.1]
-          ));
+      var dist = Math.pow(ball.x - this.x, 2) + Math.pow(ball.y - this.y, 2);
+      var force = 0;
+      force =
+        (gravitationalConstant * Math.pow(ball.ballSize, 5)) /
+        Math.sqrt(dist + dist);
+      // this.velocityY +=
+      //   Math.sin(
+      //     (gravitationalConstant * ball.ballSize) / (dist * Math.sqrt(dist))
+      //   ) * 0.01;
+
+      // this.velocityX +=
+      //   Math.cos(Math.atan2(ball.y - this.y, ball.x - this.x)) * 0.005;
+      // this.velocityY +=
+      //   Math.sin(Math.atan2(ball.y - this.y, ball.x - this.x)) * 0.005;
+
+      // Apply movement
+      this.velocityX += (ball.x - this.x) * force;
+      this.velocityY += (ball.y - this.y) * force;
+
+      // this.x += this.velocityX;
+      // this.y += this.velocityY;
+      // velocityApplied = true;
     });
 
     /* -- Mouse control -- */
@@ -105,19 +110,20 @@ class Ball {
     //this.velocityX = Math.cos(this.direction) * this.velocity;
 
     // Apply movement
-    this.x += this.velocityX;
-    this.y += this.velocityY;
+    if (!velocityApplied) {
+      this.x += this.velocityX;
+      this.y += this.velocityY;
+    }
+    velocityApplied = false;
   }
 }
 
 // Make 250 balls
-var balls = Array.from(Array(20)).map((_element, _id) => {
+var balls = Array.from(Array(100)).map((_element, _id) => {
   var id = _id;
   var b = Math.random() * 6 + 2;
   var x = Clamp(2 * b, c.width - 2 * b, Math.floor(Math.random() * c.width));
   var y = Clamp(2 * b, c.height - 2 * b, Math.floor(Math.random() * c.height));
-  //var x = c.width/2;
-  //var y = c.height/2;
   var v = (Math.random() * 1.5 + 0.1) * ((1 / b) * 2);
   var d = Math.random() * Math.PI * 2 + 100;
   return new Ball(x, y, v, d, b, id);
