@@ -157,43 +157,8 @@ function Draw() {
           ctx.stroke();
         }
       }
-      /* Test => move to somewhere else later */
-      // balls[i].velocityX +=
-      //   Math.cos(Math.atan2(balls[j].y - balls[i].y, balls[j].x - balls[i].x)) *
-      //   0.001;
-      // balls[i].velocityY +=
-      //   Math.sin(Math.atan2(balls[j].y - balls[i].y, balls[j].x - balls[i].x)) *
-      //   0.001;
     }
   }
-
-  // Draw velocity vector
-  for (var i = 0; i < balls.length; i++) {
-    ctx.beginPath();
-    ctx.moveTo(balls[i].x, balls[i].y);
-    ctx.lineTo(
-      balls[i].x + Math.cos(balls[i].direction) * balls[i].velocity * 10,
-      balls[i].y + Math.sin(balls[i].direction) * balls[i].velocity * 10
-    );
-    ctx.lineWidth = 1;
-    ctx.strokeStyle = "#0F0";
-    ctx.stroke();
-  }
-
-  /* Draw external force vector (to mouse) */
-  // for (var i = 0; i < balls.length; i++) {
-  //   ctx.beginPath();
-  //   ctx.moveTo(balls[i].x, balls[i].y);
-  //   ctx.lineTo(
-  //     balls[i].x +
-  //       Math.cos(Math.atan2(mouseY - balls[i].y, mouseX - balls[i].x)) * 100,
-  //     balls[i].y +
-  //       Math.sin(Math.atan2(mouseY - balls[i].y, mouseX - balls[i].x)) * 100
-  //   );
-  //   ctx.lineWidth = 1;
-  //   ctx.strokeStyle = "#F00";
-  //   ctx.stroke();
-  // }
 
   if (!vesa) {
     // Draw the balls
@@ -263,6 +228,18 @@ function Draw() {
         ctx.fillText(dText[i], 10, textStartPoint);
         textStartPoint += 15;
       }
+    }
+    // Draw velocity vector
+    for (var i = 0; i < balls.length; i++) {
+      ctx.beginPath();
+      ctx.moveTo(balls[i].x, balls[i].y);
+      ctx.lineTo(
+        balls[i].x + Math.cos(balls[i].direction) * balls[i].velocity * 10,
+        balls[i].y + Math.sin(balls[i].direction) * balls[i].velocity * 10
+      );
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = "#0F0";
+      ctx.stroke();
     }
   }
 
