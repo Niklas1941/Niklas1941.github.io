@@ -41,7 +41,7 @@ class Ball {
     this.velocity = velocity;
   }
 
-  Update() {
+  UpdateForces() {
     let bs = this.ballSize;
     let velocityApplied = false;
 
@@ -76,45 +76,21 @@ class Ball {
       force =
         (gravitationalConstant * Math.pow(ball.ballSize, 5)) /
         Math.sqrt(dist + dist);
-      // this.velocityY +=
-      //   Math.sin(
-      //     (gravitationalConstant * ball.ballSize) / (dist * Math.sqrt(dist))
-      //   ) * 0.01;
-
-      // this.velocityX +=
-      //   Math.cos(Math.atan2(ball.y - this.y, ball.x - this.x)) * 0.005;
-      // this.velocityY +=
-      //   Math.sin(Math.atan2(ball.y - this.y, ball.x - this.x)) * 0.005;
-
       // Apply movement
       this.velocityX += (ball.x - this.x) * force;
       this.velocityY += (ball.y - this.y) * force;
 
-      // this.x += this.velocityX;
-      // this.y += this.velocityY;
-      // velocityApplied = true;
     });
-
-    /* -- Mouse control -- */
-    // this.velocityX +=
-    // Math.cos(Math.atan2(mouseY - this.y, mouseX - this.x)) * 0.01;
-    // this.velocityY +=
-    // Math.sin(Math.atan2(mouseY - this.y, mouseX - this.x)) * 0.01;
-    /* -- Mouse control end -- */
 
     this.velocity = Math.sqrt(
       Math.pow(this.velocityX, 2) + Math.pow(this.velocityY, 2)
     );
-    this.direction = Math.atan2(this.velocityY, this.velocityX);
-    //this.velocityY = Math.sin(this.direction) * this.velocity;
-    //this.velocityX = Math.cos(this.direction) * this.velocity;
+    this.direction = Math.atan2(this.velocityY, this.velocityX);    
+  }
 
-    // Apply movement
-    if (!velocityApplied) {
-      this.x += this.velocityX;
-      this.y += this.velocityY;
-    }
-    velocityApplied = false;
+  UpdatePosition(){
+    this.x += this.velocityX;
+    this.y += this.velocityY;
   }
 }
 
@@ -139,8 +115,13 @@ function Update() {
   // Update every balls position
   if (run == true)
     for (var j = 0; j < TimeStep; j++) {
+      // Calculate the forces for all of the balls before applying them
       for (var i = 0; i < balls.length; i++) {
-        balls[i].Update();
+        balls[i].UpdateForces();
+      }
+      // Apply the forces
+      for (var i = 0; i < balls.length; i++) {
+        balls[i].UpdatePosition();
       }
     }
 
