@@ -5,15 +5,16 @@ resizeCanvas();
 var ctx = c.getContext("2d");
 
 // Global variables
-let lastCharacters = "";
-let debug = false;
-let vesa = false;
+let lastCharacters  = "";
+let debug           = false;
+let vesa            = false;
+let gravity         = false;
 
-let run = true;
-let trace = null;
+let run             = true;
+let trace           = null;
 
-let TimeStep = 1;
-let prevTimeStep = TimeStep;
+let TimeStep        = 1;
+let prevTimeStep    = TimeStep;
 
 let mouseX = c.width / 2;
 let mouseY = c.height / 2;
@@ -70,22 +71,23 @@ class Ball {
     }
 
     // Gravity
-    this.connections.forEach(ball => {
-      var dist = Math.pow(ball.x - this.x, 2) + Math.pow(ball.y - this.y, 2);
-      var force = 0;
-      force =
-        (gravitationalConstant * Math.pow(ball.ballSize, 5)) /
-        Math.sqrt(dist + dist);
-      // Apply movement
-      this.velocityX += (ball.x - this.x) * force;
-      this.velocityY += (ball.y - this.y) * force;
+    if (gravity == true) {
+      this.connections.forEach(ball => {
+        var dist = Math.pow(ball.x - this.x, 2) + Math.pow(ball.y - this.y, 2);
+        var force = 0;
+        force =
+          (gravitationalConstant * Math.pow(ball.ballSize, 5)) /
+          Math.sqrt(dist + dist);
+        // Apply movement
+        this.velocityX += (ball.x - this.x) * force;
+        this.velocityY += (ball.y - this.y) * force;
+      });
 
-    });
-
-    this.velocity = Math.sqrt(
-      Math.pow(this.velocityX, 2) + Math.pow(this.velocityY, 2)
-    );
-    this.direction = Math.atan2(this.velocityY, this.velocityX);    
+      this.velocity = Math.sqrt(
+        Math.pow(this.velocityX, 2) + Math.pow(this.velocityY, 2)
+      );
+      this.direction = Math.atan2(this.velocityY, this.velocityX);    
+    }
   }
 
   UpdatePosition(){
@@ -366,10 +368,10 @@ function resizeCanvas() {
 
 // Event listeners for buttons that can be held down
 document.addEventListener("keydown", function(event) {
-  if (event.code == "NumpadAdd") {
+  if (event.code == "NumpadAdd" || event.key == "+") {
     TimeStep += 1;
     console.log("Time step increased to " + TimeStep);
-  } else if (event.code == "NumpadSubtract") {
+  } else if (event.code == "NumpadSubtract" || event.key == "-") {
     TimeStep -= 1;
     console.log("Time step decreased to " + TimeStep);
   }
@@ -409,6 +411,10 @@ document.addEventListener("keypress", function(event) {
 
   if (lastCharacters.substring(sLength - 4, sLength) === "vesa") {
     vesa = !vesa;
+  }
+
+  if (lastCharacters.substring(sLength - 4, sLength) === "grav") {
+    gravity = !gravity;
   }
 });
 
