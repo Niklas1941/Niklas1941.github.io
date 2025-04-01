@@ -19,6 +19,8 @@ let prevTimeStep    = TimeStep;
 let mouseX = c.width / 2;
 let mouseY = c.height / 2;
 
+let totalVelocity = 0;
+
 const gravitationalConstant = 6.67 * Math.pow(10, -8);
 
 // Ball object
@@ -114,12 +116,18 @@ function Loop() {
 
 // Update function
 function Update() {
+  // Reset velocity
+  totalVelocity = 0;
+
   // Update every balls position
   if (run == true)
     for (var j = 0; j < TimeStep; j++) {
       // Calculate the forces for all of the balls before applying them
       for (var i = 0; i < balls.length; i++) {
         balls[i].UpdateForces();
+        if (TimeStep > 0) {
+          totalVelocity += balls[i].velocity/TimeStep;
+        }
       }
       // Apply the forces
       for (var i = 0; i < balls.length; i++) {
@@ -198,6 +206,7 @@ function Draw() {
 
     let dText = [];
     dText.push("TimeStep: " + TimeStep);
+    dText.push("Total velocity: " +  totalVelocity.toFixed(2));
     dText.push(trace != null ? "Selected ball id: " + trace.id : "");
     dText.push(
       trace != null
