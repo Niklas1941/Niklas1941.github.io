@@ -5,15 +5,21 @@ resizeCanvas();
 var ctx = c.getContext("2d");
 
 // Global variables
-let lastCharacters = "";
-let debug = false;
-let vesa = false;
+let lastCharacters  = "";
+let debug           = false;
+let vesa            = false;
+let gravity         = false;
 
-let run = true;
-let trace = null;
+let run             = true;
+let trace           = null;
 
-let TimeStep = 1;
-let prevTimeStep = TimeStep;
+let TimeStep        = 1;
+let prevTimeStep    = TimeStep;
+
+let mouseX = c.width / 2;
+let mouseY = c.height / 2;
+
+const gravitationalConstant = 6.67 * Math.pow(10, -8);
 
 // Ball object
 class Ball {
@@ -23,21 +29,22 @@ class Ball {
     this.x = x;
     this.y = y;
     this.direction = d;
-    this.v = v;
-    this.velocityX = this.v * Math.cos(this.direction);
-    this.velocityY = this.v * Math.sin(this.direction);
+    this.velocity = v;
+    this.velocityX = this.velocity * Math.cos(this.direction);
+    this.velocityY = this.velocity * Math.sin(this.direction);
     this.ballSize = b;
     this.color = "#000";
   }
 
   ChangeVelocity(velocity) {
-    this.velocityX = (this.velocityX / this.v) * velocity;
-    this.velocityY = (this.velocityY / this.v) * velocity;
-    this.v = velocity;
+    this.velocityX = (this.velocityX / this.velocity) * velocity;
+    this.velocityY = (this.velocityY / this.velocity) * velocity;
+    this.velocity = velocity;
   }
 
-  Update() {
+  UpdateForces() {
     let bs = this.ballSize;
+    let velocityApplied = false;
 
     // Out of bounds
     if (this.x < 0 + bs) {
@@ -55,28 +62,48 @@ class Ball {
     // Direction change (Can be done in previous if statements)
     if (this.x <= 0 + bs || this.x >= c.width - bs) {
       this.velocityX = -this.velocityX;
+      //this.direction = Math.PI - this.direction;
     }
 
     if (this.y <= 0 + bs || this.y >= c.height - bs) {
       this.velocityY = -this.velocityY;
+      //this.direction = Math.PI * 2 - this.direction;
     }
 
-    // Apply movement
+    // Gravity
+    if (gravity == true) {
+      this.connections.forEach(ball => {
+        var dist = Math.pow(ball.x - this.x, 2) + Math.pow(ball.y - this.y, 2);
+        var force = 0;
+        force =
+          (gravitationalConstant * Math.pow(ball.ballSize, 5)) /
+          Math.sqrt(dist + dist);
+        // Apply movement
+        this.velocityX += (ball.x - this.x) * force;
+        this.velocityY += (ball.y - this.y) * force;
+      });
+
+      this.velocity = Math.sqrt(
+        Math.pow(this.velocityX, 2) + Math.pow(this.velocityY, 2)
+      );
+      this.direction = Math.atan2(this.velocityY, this.velocityX);    
+    }
+  }
+
+  UpdatePosition(){
     this.x += this.velocityX;
     this.y += this.velocityY;
   }
 }
 
 // Make 250 balls
-var balls = Array.from(Array(250)).map((_element, _id) => {
+var balls = Array.from(Array(100)).map((_element, _id) => {
   var id = _id;
   var b = Math.random() * 6 + 2;
   var x = Clamp(2 * b, c.width - 2 * b, Math.floor(Math.random() * c.width));
   var y = Clamp(2 * b, c.height - 2 * b, Math.floor(Math.random() * c.height));
-  //var x = c.width/2;
-  //var y = c.height/2;
   var v = (Math.random() * 1.5 + 0.1) * ((1 / b) * 2);
-  var d = Math.random() * Math.PI * 2;
+  var d = Math.random() * Math.PI * 2 + 100;
   return new Ball(x, y, v, d, b, id);
 });
 
@@ -90,8 +117,13 @@ function Update() {
   // Update every balls position
   if (run == true)
     for (var j = 0; j < TimeStep; j++) {
+      // Calculate the forces for all of the balls before applying them
       for (var i = 0; i < balls.length; i++) {
-        balls[i].Update();
+        balls[i].UpdateForces();
+      }
+      // Apply the forces
+      for (var i = 0; i < balls.length; i++) {
+        balls[i].UpdatePosition();
       }
     }
 
@@ -113,11 +145,11 @@ function Draw() {
   for (var i = 0; i < balls.length; i++) {
     for (var j = 0; j < balls.length; j++) {
       // Find if these two have a connection already
-      let con = balls[i].connections.includes(balls[j].id);
+      let con = balls[i].connections.includes(balls[j]);
       let dis = Distance(balls[i], balls[j], 150);
       if (i != j && dis && !con) {
-        balls[i].connections.push(balls[j].id);
-        balls[j].connections.push(balls[i].id);
+        balls[i].connections.push(balls[j]);
+        balls[j].connections.push(balls[i]);
         if (!vesa) {
           ctx.beginPath();
           ctx.moveTo(balls[j].x, balls[j].y);
@@ -129,6 +161,7 @@ function Draw() {
       }
     }
   }
+
   if (!vesa) {
     // Draw the balls
     for (var i = 0; i < balls.length; i++) {
@@ -166,7 +199,27 @@ function Draw() {
     let dText = [];
     dText.push("TimeStep: " + TimeStep);
     dText.push(trace != null ? "Selected ball id: " + trace.id : "");
+    dText.push(
+      trace != null
+        ? "Position(X:Y): " + Math.round(trace.x) + ":" + Math.round(trace.y)
+        : ""
+    );
+    dText.push(
+      trace != null
+        ? "Celoxity(X:Y): " +
+            trace.velocityX.toFixed(2) +
+            ":" +
+            trace.velocityY.toFixed(2)
+        : ""
+    );
+    dText.push(trace != null ? "direction: " + trace.direction : "");
+    dText.push(
+      trace != null
+        ? "vector angle: " + Math.atan2(mouseX - trace.x, mouseY - trace.y)
+        : ""
+    );
     dText.push("Last typed characters: " + lastCharacters);
+    dText.push("mouse position(X:Y): " + mouseX + ":" + mouseY);
 
     ctx.fillStyle = "#000";
 
@@ -177,6 +230,18 @@ function Draw() {
         ctx.fillText(dText[i], 10, textStartPoint);
         textStartPoint += 15;
       }
+    }
+    // Draw velocity vector
+    for (var i = 0; i < balls.length; i++) {
+      ctx.beginPath();
+      ctx.moveTo(balls[i].x, balls[i].y);
+      ctx.lineTo(
+        balls[i].x + Math.cos(balls[i].direction) * balls[i].velocity * 10,
+        balls[i].y + Math.sin(balls[i].direction) * balls[i].velocity * 10
+      );
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = "#0F0";
+      ctx.stroke();
     }
   }
 
@@ -210,7 +275,7 @@ function Distance(a, b, distance) {
     // After calculating that it could be close enough then do the more presice calculation
     const dis = Math.hypot(dx, dy);
     if (dis < distance) {
-      return true;
+      return dis;
     }
   }
   return false;
@@ -236,7 +301,7 @@ function TraceConnections(_id) {
   } else if (_id == "fastest") {
     var fastest = balls[0];
     for (var t = 0; t < balls.length; t++) {
-      if (fastest.v < balls[t].v) {
+      if (fastest.velocity < balls[t].velocity) {
         fastest = balls[t];
       }
     }
@@ -264,7 +329,7 @@ function FindBall(_id) {
     return "No id given!";
   } else {
     balls[_id].color = "#f00";
-    return "Colored ball red";
+    return balls[_id];
   }
 }
 
@@ -291,6 +356,10 @@ function selectBall(event) {
   TraceConnections();
 }
 
+function convertRange(value, r1, r2) {
+  return ((value - r1[0]) * (r2[1] - r2[0])) / (r1[1] - r1[0]) + r2[0];
+}
+
 // Self explanatory
 function resizeCanvas() {
   c.width = window.innerWidth;
@@ -299,10 +368,10 @@ function resizeCanvas() {
 
 // Event listeners for buttons that can be held down
 document.addEventListener("keydown", function(event) {
-  if (event.code == "NumpadAdd") {
+  if (event.code == "NumpadAdd" || event.key == "+") {
     TimeStep += 1;
     console.log("Time step increased to " + TimeStep);
-  } else if (event.code == "NumpadSubtract") {
+  } else if (event.code == "NumpadSubtract" || event.key == "-") {
     TimeStep -= 1;
     console.log("Time step decreased to " + TimeStep);
   }
@@ -343,6 +412,16 @@ document.addEventListener("keypress", function(event) {
   if (lastCharacters.substring(sLength - 4, sLength) === "vesa") {
     vesa = !vesa;
   }
+
+  if (lastCharacters.substring(sLength - 4, sLength) === "grav") {
+    gravity = !gravity;
+  }
+});
+
+c.addEventListener("mousemove", function(e) {
+  var cRect = c.getBoundingClientRect();
+  mouseX = Math.round(e.clientX - cRect.left); // Subtract the 'left' of the canvas
+  mouseY = Math.round(e.clientY - cRect.top); // from the X/Y positions to make
 });
 
 // If clicked somewhere then do this
